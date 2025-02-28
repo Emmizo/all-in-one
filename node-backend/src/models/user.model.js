@@ -29,34 +29,35 @@ class UserModel {
 
   // Create new user
   async create(userData) {
-    const { name, email, role = 'User', image } = userData;
-
+    const { name, email, role = 'User' } = userData;
+    
     const [result] = await pool.query(
-        'INSERT INTO users (name, email, role, image) VALUES (?, ?, ?, ?)',
-        [name, email, role, image]
+      'INSERT INTO users (name, email, role) VALUES (?, ?, ?)',
+      [name, email, role]
     );
-
+    
     const [newUser] = await pool.query('SELECT * FROM users WHERE id = ?', [result.insertId]);
     return newUser[0];
-}
+  }
 
-async update(id, updates) {
+  // Update user
+  async update(id, updates) {
+    // Build the SQL query dynamically
     const fields = Object.keys(updates).map(key => `${key} = ?`).join(', ');
     const values = Object.values(updates);
-
+    
     if (fields.length === 0) {
-        return null;
+      return null;
     }
-
+    
     await pool.query(
-        `UPDATE users SET ${fields} WHERE id = ?`,
-        [...values, id]
+      `UPDATE users SET ${fields} WHERE id = ?`,
+      [...values, id]
     );
-
+    
     const [updatedUser] = await pool.query('SELECT * FROM users WHERE id = ?', [id]);
     return updatedUser.length ? updatedUser[0] : null;
-}
-
+  }
 
   // Delete user
   async delete(id) {
